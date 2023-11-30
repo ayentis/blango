@@ -3,10 +3,15 @@ from blog.forms import CommentForm
 from django.utils import timezone
 from blog.models import Post
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 def index(request):
   posts = Post.objects.filter(published_at__lte=timezone.now())
   #posts = Post.objects.all()
+  logger.debug("executed index")
   return render(request, "blog/index.html", {"posts": posts})
 
 def post_detail(request, slug):
@@ -20,10 +25,13 @@ def post_detail(request, slug):
         comment.content_object = post
         comment.creator = request.user
         comment.save()
+        logger.debug("executed post details POST")
         return redirect(request.path_info)
     else:
+      logger.info("executed post details POST (form is not valid)")
       comment_form = CommentForm()
   else:
+    logger.debug("executed post details GET")
     comment_form = None
 
   return render(request, "blog/post-detail.html", {"post": post, "comment_form": comment_form})
